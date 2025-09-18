@@ -107,3 +107,4 @@ Pull requests are welcome. Please ensure code is formatted and that new features
 
 ## License
 This project is licensed under the [MIT License](LICENSE).
+

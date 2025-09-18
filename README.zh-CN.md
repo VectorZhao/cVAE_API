@@ -106,3 +106,4 @@ curl -X POST http://127.0.0.1:8000/api/single_prediction \
 
 ## 许可协议
 本项目基于 [MIT 许可证](LICENSE)。
+
