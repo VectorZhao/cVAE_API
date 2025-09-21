@@ -89,6 +89,32 @@ Accepts multipart form-data with:
 - `file`: uploaded `.npy`, `.csv`, `.xlsx`, or `.parquet` file containing the four feature columns in the order `[Mass, Radius, Fe/Mg, Si/Mg]`.
 - Optional `Times` form field (defaults to 10).
 
+### `POST /api/prediction_with_gaussian`
+Accept `value` and `std` for each input parameter. `value` and `std` are the hard required variables for each input parameter.
+`sample_num` represents the number of Gaussian samples for each point, which is an optional variable, defaulting to 10.
+```json
+{
+    "Mass": {
+        "value": [3.72, 1.77],
+        "std": [0.42, 0.25]
+    },
+    "Radius": {
+        "value": [1.470,1.228],
+        "std": [0.03, 0.019]
+    },
+    "Fe/Mg": {
+        "value": [0.589, 0.813],
+        "std": [0.073, 0.248]
+    },
+    "Si/Mg": {
+        "value": [0.661, 0.933],
+        "std": [0.098, 0.281]
+    },
+    "sample_num": 100,
+    "Times": 5
+}
+```
+
 Returns a JSON object that contains the predicted distributions for each input row. Mass and radius derived quantities in the output are rescaled to original units before being returned.
 
 ## Model outputs
