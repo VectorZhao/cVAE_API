@@ -14,7 +14,32 @@ def load_model_scaler():
 
     return model, x_scaler, y_scaler
 
-def inference(data, is_file=False):
+def dict_to_array(data):
+    data_collection = []
+    for p in INPUT_PARAM:
+        data_collection.append(data[p])
+
+    data_collection = np.vstack(data_collection)
+    data_collection = data_collection.transpose(1, 0)
+    return data_collection
+
+def gaussian_sampling(data):
+
+    data_length = len(data['Mass']['value'])
+
+    tmp = []
+    for i in range(data_length):
+        mass = np.random.normal(data['Mass']['value'][i], data['Mass']['std'][i], size=data['sample_num'])
+        radius = np.random.normal(data['Radius']['value'][i], data['Radius']['std'][i], size=data['sample_num'])
+        fe_mg = np.random.normal(data['Fe/Mg']['value'][i], data['Fe/Mg']['std'][i], size=data['sample_num'])
+        si_mg = np.random.normal(data['Si/Mg']['value'][i], data['Si/Mg']['std'][i], size=data['sample_num'])
+
+        tmp.append(np.stack([mass, radius, fe_mg, si_mg], axis=1))
+
+    tmp = np.vstack(tmp)
+    return tmp
+
+def inference(data, is_file=False, gaussian=False):
 
     model, x_scaler, y_scaler = load_model_scaler()
 
@@ -25,16 +50,20 @@ def inference(data, is_file=False):
     input_data = []
 
     if not is_file:
-        for p in INPUT_PARAM:
-            input_data.append(data[p])
+        if gaussian:
+            input_data = gaussian_sampling(data)
 
-        input_data = np.vstack(input_data)
-        input_data = input_data.transpose(1, 0)
+        else:
+            input_data = dict_to_array(data)
 
     else:
         input_data = data['input']
 
-    data_length = input_data.shape[0]
+    if gaussian:
+        data_length = len(data['Mass']['value'])
+
+    else:
+        data_length = input_data.shape[0]
     x = x_scaler.transform(input_data)
     # input_data = torch.from_numpy(input_data).to(DEVICE)
 
@@ -63,13 +92,13 @@ def single_prediction() -> ResponseReturnValue:
     data = request.get_json()
     out = inference(data)
 
-    return {'Receive': data, "Prediction_distribution": out}
+    return {'Input format': "Form Data", "Output": {"Prediction_distribution": out}, 'Gaussian': "False"}
 
 @bp.post('/multi_prediction')
 def multi_prediction() -> ResponseReturnValue:
     data = request.get_json()
     out = inference(data)
-    return {"Receive": data, "Prediction_distribution": out}
+    return {'Input format': "Form Data", "Output": {"Prediction_distribution": out}, 'Gaussian': "False"}
 
 @bp.post('/file_prediction')
 def file_prediction() -> ResponseReturnValue:
@@ -107,4 +136,18 @@ def file_prediction() -> ResponseReturnValue:
     data['Times'] = times
 
     out = inference(data, is_file=True)
-    return {"Prediction_distribution": out}
+    return {'Input format': "File & Form Data", "Output": {"Prediction_distribution": out}, 'Gaussian': "False"}
+
+@bp.post('/prediction_with_gaussian')
+def prediction_with_uncertainty() -> ResponseReturnValue:
+    data = request.get_json()
+    if 'sample_num' not in data.keys():
+        data['sample_num'] = 10
+
+    for k in data.keys():
+        if isinstance(data[k], dict):
+            if 'std' not in data[k].keys():
+                return jsonify({"error": "Lack of required parameter 'std' in {}".format(k)}), 400
+
+    out = inference(data, gaussian=True)
+    return {'Input format': "Form Data", "Output": {"Prediction_distribution": out}, 'Gaussian': "True"}
