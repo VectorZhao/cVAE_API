@@ -89,6 +89,31 @@ curl -X POST http://127.0.0.1:8000/api/single_prediction \
 - `file`：上传包含四个特征列（顺序为 `[Mass, Radius, Fe/Mg, Si/Mg]`）的 `.npy`、`.csv`、`.xlsx` 或 `.parquet` 文件。
 - 可选 `Times` 表单字段（默认 10）。
 
+### `POST /api/prediction_with_gaussian`
+接收每个输入特征的`value`和`std`, 两个参数都是必填项，`sample_num`代表每条输入的高斯采样样本数量，为可选项，默认为10。
+```json
+{
+    "Mass": {
+        "value": [3.72, 1.77],
+        "std": [0.42, 0.25]
+    },
+    "Radius": {
+        "value": [1.470,1.228],
+        "std": [0.03, 0.019]
+    },
+    "Fe/Mg": {
+        "value": [0.589, 0.813],
+        "std": [0.073, 0.248]
+    },
+    "Si/Mg": {
+        "value": [0.661, 0.933],
+        "std": [0.098, 0.281]
+    },
+    "sample_num": 100,
+    "Times": 5
+}
+```
+
 接口会返回每行输入对应的预测分布，质量和半径相关的输出会在返回前转换回原始单位。
 
 ## 模型输出参数
