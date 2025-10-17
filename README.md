@@ -132,4 +132,4 @@ Predictions include distributions for the following parameters:
 Pull requests are welcome. Please ensure code is formatted and that new features include suitable documentation updates.
 
 ## License
-Specify the project license here if available.
+This project is licensed under the [MIT License](LICENSE).
