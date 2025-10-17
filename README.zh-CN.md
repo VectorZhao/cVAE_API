@@ -130,4 +130,5 @@ curl -X POST http://127.0.0.1:8000/api/single_prediction \
 欢迎提交 Pull Request。请确保代码格式规范，并为新功能补充相应的文档说明。
 
 ## 许可协议
-如有许可证，请在此处说明。
+本项目基于[MIT 许可证](LICENSE)
+
